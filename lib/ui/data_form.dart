@@ -42,8 +42,11 @@ class _HomePageState extends State<HomePage> {
   // TextEditingController _taskTextController = TextEditingController();
 
   _buildBody() {
-    return FutureBuilder<QuerySnapshot>(
-      future: FirebaseFirestore.instance.collection('posts').get(),
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('posts')
+          .orderBy('date')
+          .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final List<DocumentSnapshot> documents = snapshot.data!.docs;
@@ -173,6 +176,8 @@ class _HomePageState extends State<HomePage> {
                 Center(
                   child: ElevatedButton(
                     onPressed: () async {
+                      final date =
+                          DateTime.now().toLocal().toIso8601String(); // 現在の日時
                       // 漁獲量追加
                       await FirebaseFirestore.instance
                           .collection('posts') // コレクションID指定
@@ -180,6 +185,7 @@ class _HomePageState extends State<HomePage> {
                           .collection('catches')
                           .doc() // ドキュメントID自動生成
                           .set({
+                        'date': date,
                         'fishingPortId': documentId,
                         'species': _speciesName,
                         'num': _catchAmount,
@@ -245,12 +251,13 @@ class _HomePageState extends State<HomePage> {
                 SingleChildScrollView(
                   child: Container(
                     height: MediaQuery.of(context).size.height * 0.7,
-                    child: FutureBuilder<QuerySnapshot>(
-                      future: FirebaseFirestore.instance
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
                           .collection('posts')
                           .doc(document.id)
                           .collection('catches')
-                          .get(),
+                          .orderBy('date')
+                          .snapshots(),
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           final List<DocumentSnapshot> innerDocuments =

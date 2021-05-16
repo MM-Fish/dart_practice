@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:practice/ui/login.dart';
+import 'package:practice/ui/login_page.dart';
 // import 'package:provider/provider.dart';
 
 // // 更新可能なデータ
