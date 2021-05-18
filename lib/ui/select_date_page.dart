@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:practice/ui/confirm_page.dart';
 
 class SelectDatePage extends StatefulWidget {
   @override
@@ -59,67 +59,6 @@ class _SelectDatePageState extends State<SelectDatePage> {
           );
         },
         child: Icon(Icons.check),
-      ),
-    );
-  }
-}
-
-class ConfirmPage extends StatelessWidget {
-  final String date;
-  ConfirmPage(this.date);
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('登録内容確認'),
-      ),
-      body: Column(
-        children: <Widget>[
-          Container(
-            child: Text(this.date),
-          ),
-          Container(
-            child: FutureBuilder<QuerySnapshot>(
-              future: FirebaseFirestore.instance
-                  .collection('posts')
-                  .doc('slUZ91BWMLak1ApEk5dt')
-                  .collection('catches')
-                  .get(),
-              builder: (context, snapshot) {
-                // データが取得できた場合
-                if (snapshot.hasData) {
-                  final List<DocumentSnapshot> documents = snapshot.data!.docs;
-                  // 取得した投稿メッセージ一覧を元にリスト表示
-                  return ListView(
-                    shrinkWrap: true, //追加
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: documents.map((document) {
-                      if (document['condition'] == '鮮魚')
-                        return Text(document['species'] +
-                            ' ' +
-                            document['num'].toString() +
-                            ' ' +
-                            document['unit']);
-                      else {
-                        return Text(document['species'] +
-                            '(' +
-                            document['condition'][0] +
-                            ')' +
-                            ' ' +
-                            document['num'].toString() +
-                            ' ' +
-                            document['unit']);
-                      }
-                    }).toList(),
-                  );
-                } else {
-                  return Text('漁獲無し');
-                }
-                ;
-              },
-            ),
-          ),
-        ],
       ),
     );
   }
