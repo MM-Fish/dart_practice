@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:practice/ui/login_page.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 // import 'package:provider/provider.dart';
 
 // // 更新可能なデータ
@@ -31,7 +32,14 @@ class MyApp extends StatelessWidget {
       ),
       // home: CatchDataListPage(),
       home: LoginPage(),
-      // builder: (BuildContext context, Widget widget) {
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: [
+        const Locale("en"),
+        const Locale("ja"),
+      ], // builder: (BuildContext context, Widget widget) {
       //   Widget error = Text('...rendering error...');
       //   if (widget is Scaffold || widget is Navigator)
       //     error = Scaffold(body: Center(child: error));

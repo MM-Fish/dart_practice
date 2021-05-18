@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:practice/ui/select_date_page.dart';
+import 'package:practice/extention/name_change.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -16,6 +18,9 @@ class _HomePageState extends State<HomePage> {
   String _catchUnit = 'case';
   List<String> _fishConditionItems = ["鮮魚", "活魚", "冷凍", "A", "B"];
   String _fishCondition = "鮮魚";
+
+  TextEditingController _cardTextController = TextEditingController();
+  // TextEditingController _taskTextController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -37,9 +42,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
-  TextEditingController _cardTextController = TextEditingController();
-  // TextEditingController _taskTextController = TextEditingController();
 
   _buildBody() {
     return StreamBuilder<QuerySnapshot>(
@@ -376,39 +378,6 @@ class _HomePageState extends State<HomePage> {
             Text("漁獲量追加"),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class SelectDatePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('日付確認'),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) {
-              return ConfirmPage();
-            }),
-          );
-        },
-        child: Icon(Icons.check),
-      ),
-    );
-  }
-}
-
-class ConfirmPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('登録内容確認'),
       ),
     );
   }
