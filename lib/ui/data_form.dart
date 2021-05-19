@@ -140,64 +140,66 @@ class _HomePageState extends State<HomePage> {
             ),
             margin: const EdgeInsets.all(16.0),
             height: MediaQuery.of(context).size.height * 0.8,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(2.0),
-                  child: ListTile(
-                    title: Text(
-                      cardTitle,
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: ListTile(
+                      title: Text(
+                        cardTitle,
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () async {
+                          await FirebaseFirestore.instance
+                              .collection('posts')
+                              .doc(document.id)
+                              .delete();
+                        },
                       ),
                     ),
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () async {
-                        await FirebaseFirestore.instance
+                  ),
+                  SingleChildScrollView(
+                    child: Container(
+                      height: MediaQuery.of(context).size.height * 0.7,
+                      child: StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
                             .collection('posts')
                             .doc(document.id)
-                            .delete();
-                      },
+                            .collection('catches')
+                            .orderBy('date')
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            final List<DocumentSnapshot> innerDocuments =
+                                snapshot.data!.docs;
+                            // 取得した投稿メッセージ一覧を元にリスト表示
+                            return ListView.builder(
+                              itemCount: innerDocuments.length + 1,
+                              itemBuilder: (context, index) {
+                                if (index == innerDocuments.length)
+                                  return _buildAddCardTaskWidget(
+                                      context, index, document.id);
+                                else
+                                  return _buildCardTask(index, document.id,
+                                      innerDocuments[index]);
+                              },
+                            );
+                          } else {
+                            return _buildAddCardWidget(context);
+                          }
+                        },
+                      ),
                     ),
                   ),
-                ),
-                SingleChildScrollView(
-                  child: Container(
-                    height: MediaQuery.of(context).size.height * 0.7,
-                    child: StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('posts')
-                          .doc(document.id)
-                          .collection('catches')
-                          .orderBy('date')
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          final List<DocumentSnapshot> innerDocuments =
-                              snapshot.data!.docs;
-                          // 取得した投稿メッセージ一覧を元にリスト表示
-                          return ListView.builder(
-                            itemCount: innerDocuments.length + 1,
-                            itemBuilder: (context, index) {
-                              if (index == innerDocuments.length)
-                                return _buildAddCardTaskWidget(
-                                    context, index, document.id);
-                              else
-                                return _buildCardTask(
-                                    index, document.id, innerDocuments[index]);
-                            },
-                          );
-                        } else {
-                          return _buildAddCardWidget(context);
-                        }
-                      },
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -313,6 +315,12 @@ class _DialogCatchFormState extends State<DialogCatchForm> {
   List<String> _fishConditionItems = ["鮮魚", "活魚", "冷凍", "A", "B"];
   String _fishCondition = "鮮魚";
 
+  TextEditingController _speciesNameController = TextEditingController();
+
+  final List<String> searchTargets = ['赤ガレイ', 'エテガレイ', 'ハタハタ'];
+
+  List<String> searchResults = [];
+
   Widget _conditionButton() {
     return DropdownButton(
       value: _fishCondition,
@@ -329,13 +337,31 @@ class _DialogCatchFormState extends State<DialogCatchForm> {
 
   Widget _speciesTextField() {
     return TextField(
+      controller: _speciesNameController,
       decoration: InputDecoration(
         hintText: '魚種名（産地名称）',
       ),
       onChanged: (String value) {
-        setState(() {
-          _speciesName = value;
-        });
+        _speciesName = value;
+        search(value);
+        // setState(() {
+        //   _speciesName = value;
+        // });
+      },
+    );
+  }
+
+  Widget _searchedText() {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: searchResults.length,
+      itemBuilder: (BuildContext context, int index) {
+        return ListTile(
+          title: Text(
+            searchResults[index],
+          ),
+        );
       },
     );
   }
@@ -394,6 +420,23 @@ class _DialogCatchFormState extends State<DialogCatchForm> {
     );
   }
 
+  void search(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        searchResults.clear();
+      });
+      return;
+    }
+
+    final List<String> hitItems = searchTargets.where((element) {
+      return element.contains(query);
+    }).toList();
+
+    setState(() {
+      searchResults = hitItems;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SimpleDialog(
@@ -401,6 +444,7 @@ class _DialogCatchFormState extends State<DialogCatchForm> {
       children: <Widget>[
         _conditionButton(),
         _speciesTextField(),
+        _searchedText(),
         _numberTextField(),
         _unitButton(),
         SizedBox(
