@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:practice/ui/select_date_page.dart';
-import 'package:practice/extention/name_change.dart';
+import 'package:practice/ui/dialog_catch_form.dart';
+import 'package:practice/ui/dialog_fishing_port_method_form.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -12,9 +13,6 @@ class _HomePageState extends State<HomePage> {
   List<List> childres = [
     ['test']
   ];
-
-  TextEditingController _cardTextController = TextEditingController();
-  // TextEditingController _taskTextController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -66,48 +64,11 @@ class _HomePageState extends State<HomePage> {
 
   _showAddCard() {
     showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        return Dialog(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  decoration: InputDecoration(hintText: "漁港名"),
-                  controller: _cardTextController,
-                ),
-              ),
-              SizedBox(
-                height: 30.0,
-              ),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final date =
-                        DateTime.now().toLocal().toIso8601String(); // 現在の日時
-                    final email = 'program@gmail.com'; // AddPostPage のデータを参照
-                    // 投稿メッセージ用ドキュメント作成
-                    await FirebaseFirestore.instance
-                        .collection('posts') // コレクションID指定
-                        .doc() // ドキュメントID自動生成
-                        .set({
-                      'text': _cardTextController.text.trim(),
-                      'email': email,
-                      'date': date
-                    });
-                    Navigator.of(context).pop();
-                  },
-                  child: Text("漁港追加"),
-                ),
-              )
-            ],
-          ),
-        );
-      },
-    );
+        context: context,
+        barrierDismissible: true,
+        builder: (_) {
+          return DialogFishingPortMethodForm();
+        });
   }
 
   _showAddCardTask(int index, String documentId) {
@@ -121,7 +82,8 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildCard(
       BuildContext context, int index, DocumentSnapshot document) {
-    String cardTitle = document['text'];
+    String cardTitle =
+        document['fishingPort'] + ' 【' + document['fishingMethod'] + '】';
     return Container(
       child: Stack(
         children: <Widget>[
@@ -295,163 +257,6 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class DialogCatchForm extends StatefulWidget {
-  final String documentId;
-  DialogCatchForm(this.documentId);
-
-  @override
-  _DialogCatchFormState createState() => _DialogCatchFormState();
-}
-
-class _DialogCatchFormState extends State<DialogCatchForm> {
-  String _speciesName = '';
-  String _catchAmount = '';
-  List<String> _catchUnitItems = ["case", "kg", "t", "匹"];
-  String _catchUnit = 'case';
-  List<String> _fishConditionItems = ["鮮魚", "活魚", "冷凍", "A", "B"];
-  String _fishCondition = "鮮魚";
-
-  TextEditingController _speciesNameController = TextEditingController();
-
-  final List<String> searchTargets = ['赤ガレイ', 'エテガレイ', 'ハタハタ'];
-
-  List<String> searchResults = [];
-
-  Widget _conditionButton() {
-    return DropdownButton(
-      value: _fishCondition,
-      onChanged: (String? value) {
-        setState(() {
-          _fishCondition = value!;
-        });
-      },
-      items: _fishConditionItems.map<DropdownMenuItem<String>>((String value) {
-        return DropdownMenuItem<String>(value: value, child: Text(value));
-      }).toList(),
-    );
-  }
-
-  Widget _speciesTextField() {
-    return TextField(
-      controller: _speciesNameController,
-      decoration: InputDecoration(
-        hintText: '魚種名（産地名称）',
-      ),
-      onChanged: (String value) {
-        _speciesName = value;
-        search(value);
-        // setState(() {
-        //   _speciesName = value;
-        // });
-      },
-    );
-  }
-
-  Widget _searchedText() {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: searchResults.length,
-      itemBuilder: (BuildContext context, int index) {
-        return ListTile(
-          title: Text(
-            searchResults[index],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _numberTextField() {
-    return TextField(
-      decoration: InputDecoration(
-        hintText: 'ケース数',
-      ),
-      keyboardType: TextInputType.number,
-      onChanged: (String value) {
-        setState(() {
-          _catchAmount = value;
-        });
-      },
-    );
-  }
-
-  Widget _unitButton() {
-    return DropdownButton(
-      value: _catchUnit,
-      onChanged: (String? value) {
-        setState(() {
-          _catchUnit = value!;
-        });
-      },
-      items: _catchUnitItems.map<DropdownMenuItem<String>>((String value) {
-        return DropdownMenuItem<String>(value: value, child: Text(value));
-      }).toList(),
-    );
-  }
-
-  Widget _dataUpdateBottun() {
-    return Center(
-      child: ElevatedButton(
-        onPressed: () async {
-          final date = DateTime.now().toLocal().toIso8601String(); // 現在の日時
-          // 漁獲量追加
-          await FirebaseFirestore.instance
-              .collection('posts') // コレクションID指定
-              .doc(widget.documentId)
-              .collection('catches')
-              .doc() // ドキュメントID自動生成
-              .set({
-            'date': date,
-            'fishingPortId': widget.documentId,
-            'species': _speciesName,
-            'num': _catchAmount,
-            'unit': _catchUnit,
-            'condition': _fishCondition,
-          });
-          Navigator.of(context).pop();
-        },
-        child: Text("漁獲量追加"),
-      ),
-    );
-  }
-
-  void search(String query) {
-    if (query.isEmpty) {
-      setState(() {
-        searchResults.clear();
-      });
-      return;
-    }
-
-    final List<String> hitItems = searchTargets.where((element) {
-      return element.contains(query);
-    }).toList();
-
-    setState(() {
-      searchResults = hitItems;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SimpleDialog(
-      title: const Text('漁獲量登録'),
-      children: <Widget>[
-        _conditionButton(),
-        _speciesTextField(),
-        _searchedText(),
-        _numberTextField(),
-        _unitButton(),
-        SizedBox(
-          height: 30.0,
-        ),
-        _dataUpdateBottun(),
-      ],
     );
   }
 }
