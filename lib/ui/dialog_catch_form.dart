@@ -17,7 +17,22 @@ class _DialogCatchFormState extends State<DialogCatchForm> {
   List<String> _fishConditionItems = ["鮮魚", "活魚", "冷凍", "A", "B"];
   String _fishCondition = "鮮魚";
 
-  final List<String> searchTargets = ['赤ガレイ', 'エテガレイ', 'ハタハタ'];
+  // final List<String> searchTargets = ['赤ガレイ', 'エテガレイ', 'ハタハタ'];
+
+  final _searchTargets = Map<String, String>();
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData();
+  }
+
+  void fetchUserData() async {
+    QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection('validations').get();
+    snapshot.docs.forEach(
+        (doc) => {_searchTargets[doc['santiName']] = doc['haishinName']});
+  }
 
   List<String> searchResults = [];
 
@@ -41,13 +56,13 @@ class _DialogCatchFormState extends State<DialogCatchForm> {
         if (textEditingValue.text == '') {
           return const Iterable<String>.empty();
         }
-        return searchTargets.where((String option) {
+        return _searchTargets.keys.where((String option) {
           return option.contains(textEditingValue.text.toLowerCase());
         });
       },
       onSelected: (String selection) {
         setState(() {
-          _speciesName = selection;
+          _speciesName = _searchTargets[selection].toString();
         });
         print('You just selected $selection');
       },

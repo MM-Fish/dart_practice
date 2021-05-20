@@ -36,7 +36,6 @@ class ConfirmPage extends StatelessWidget {
                   } else {
                     return Text('漁獲無し');
                   }
-                  ;
                 },
               ),
             ),
@@ -87,7 +86,6 @@ class ConfirmPage extends StatelessWidget {
             } else {
               return Text('漁獲無し');
             }
-            ;
           },
         ),
       ],
