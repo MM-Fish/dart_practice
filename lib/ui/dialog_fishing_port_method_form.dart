@@ -11,8 +11,9 @@ class _DialogFishingPortMethodFormState
     extends State<DialogFishingPortMethodForm> {
   String _fishingPort = '';
   String _fishingMethod = '底曳';
-  final fishingPortTargets = Map<String, String>();
-  final List<String> _fishingMethods = [];
+  final _fishingPortTargets = Map<String, List<dynamic>>();
+  final _prefectureTargets = Map<int, List<dynamic>>();
+  final _fishingMethods = Map<String, int>();
 
   @override
   void initState() {
@@ -25,14 +26,26 @@ class _DialogFishingPortMethodFormState
     QuerySnapshot snapshot =
         await FirebaseFirestore.instance.collection('fishing_methods').get();
     snapshot.docs
-        .forEach((doc) => {_fishingMethods.add(doc['fishing_method'])});
+        .forEach((doc) => {_fishingMethods[doc['fishing_method']] = doc['id']});
   }
 
   void fetchFishingPort() async {
-    QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('fishing_regions').get();
-    snapshot.docs
-        .forEach((doc) => {_fishingMethods[doc['prefecture']] = doc.id});
+    QuerySnapshot prefectureSnapshot =
+        await FirebaseFirestore.instance.collection('prefectures').get();
+    prefectureSnapshot.docs.forEach((doc) => {
+          _prefectureTargets[doc['id']] = [doc['prefecture'], doc['charactor']]
+        });
+    QuerySnapshot fishingPortSnapshot =
+        await FirebaseFirestore.instance.collection('fishing_ports').get();
+    fishingPortSnapshot.docs.forEach((doc) => {
+          _fishingPortTargets[doc['fishing_port']] = [
+            doc.id,
+            doc['id'],
+            doc['prefecture_id'],
+            _prefectureTargets[doc['prefecture_id']]![0],
+            _prefectureTargets[doc['prefecture_id']]![1],
+          ]
+        });
   }
 
   Widget _fishingPortTextField() {
@@ -41,7 +54,7 @@ class _DialogFishingPortMethodFormState
         if (textEditingValue.text == '') {
           return const Iterable<String>.empty();
         }
-        return fishingPortTargets.keys.where((String option) {
+        return _fishingPortTargets.keys.where((String option) {
           return option.contains(textEditingValue.text.toLowerCase());
         });
       },
@@ -62,7 +75,7 @@ class _DialogFishingPortMethodFormState
           _fishingMethod = value!;
         });
       },
-      items: _fishingMethods.map<DropdownMenuItem<String>>((String value) {
+      items: _fishingMethods.keys.map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(value: value, child: Text(value));
       }).toList(),
     );
@@ -72,15 +85,19 @@ class _DialogFishingPortMethodFormState
     return Center(
       child: ElevatedButton(
         onPressed: () async {
-          final date = DateTime.now().toLocal().toIso8601String(); // 現在の日時
           // 漁獲量追加
           await FirebaseFirestore.instance
               .collection('posts') // コレクションID指定
               .doc() // ドキュメントID自動生成
               .set({
-            'date': date,
+            'fishingPortDocsId': _fishingPortTargets[_fishingPort]![0],
+            'fishingPortId': _fishingPortTargets[_fishingPort]![1],
+            'fishingMethodId': _fishingMethods[_fishingMethod],
+            'prefectureId': _fishingPortTargets[_fishingPort]![2],
             'fishingPort': _fishingPort,
             'fishingMethod': _fishingMethod,
+            'prefecture': _fishingPortTargets[_fishingPort]![3],
+            'charactor': _fishingPortTargets[_fishingPort]![4],
           });
           Navigator.of(context).pop();
         },

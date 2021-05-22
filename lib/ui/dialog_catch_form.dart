@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 
 class DialogCatchForm extends StatefulWidget {
   final String documentId;
-  DialogCatchForm(this.documentId);
+  final String fishingPortDocsId;
+  DialogCatchForm(this.documentId, this.fishingPortDocsId);
 
   @override
   _DialogCatchFormState createState() => _DialogCatchFormState();
@@ -11,13 +12,15 @@ class DialogCatchForm extends StatefulWidget {
 
 class _DialogCatchFormState extends State<DialogCatchForm> {
   String _speciesName = '';
+  int _category1 = 0;
+  int _category2 = 0;
   String _catchAmount = '';
   List<String> _catchUnitItems = ["case", "kg", "t", "匹"];
   String _catchUnit = 'case';
   List<String> _fishConditionItems = ["鮮魚", "活魚", "冷凍", "A", "B"];
   String _fishCondition = "鮮魚";
   List<String> searchResults = [];
-  final _searchTargets = Map<String, String>();
+  final _searchTargets = Map<String, List>();
 
   @override
   void initState() {
@@ -26,10 +29,18 @@ class _DialogCatchFormState extends State<DialogCatchForm> {
   }
 
   void fetchSearchTarget() async {
-    QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('validations').get();
-    snapshot.docs.forEach(
-        (doc) => {_searchTargets[doc['santiName']] = doc['haishinName']});
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('fishing_ports')
+        .doc(widget.fishingPortDocsId)
+        .collection('validations')
+        .get();
+    snapshot.docs.forEach((doc) => {
+          _searchTargets[doc['santi_name']] = [
+            doc['haishin_name'],
+            doc['category1'],
+            doc['category2']
+          ]
+        });
   }
 
   Widget _conditionButton() {
@@ -58,9 +69,10 @@ class _DialogCatchFormState extends State<DialogCatchForm> {
       },
       onSelected: (String selection) {
         setState(() {
-          _speciesName = _searchTargets[selection].toString();
+          _speciesName = _searchTargets[selection]![0].toString();
+          _category1 = _searchTargets[selection]![1];
+          _category2 = _searchTargets[selection]![2];
         });
-        print('You just selected $selection');
       },
     );
   }
@@ -97,7 +109,6 @@ class _DialogCatchFormState extends State<DialogCatchForm> {
     return Center(
       child: ElevatedButton(
         onPressed: () async {
-          final date = DateTime.now().toLocal().toIso8601String(); // 現在の日時
           // 漁獲量追加
           await FirebaseFirestore.instance
               .collection('posts') // コレクションID指定
@@ -105,12 +116,13 @@ class _DialogCatchFormState extends State<DialogCatchForm> {
               .collection('catches')
               .doc() // ドキュメントID自動生成
               .set({
-            'date': date,
             'fishingPortId': widget.documentId,
             'species': _speciesName,
             'num': _catchAmount,
             'unit': _catchUnit,
             'condition': _fishCondition,
+            'category1': _category1,
+            'category2': _category2,
           });
           Navigator.of(context).pop();
         },

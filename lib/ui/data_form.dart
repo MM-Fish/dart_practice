@@ -33,10 +33,7 @@ class _HomePageState extends State<HomePage> {
 
   _buildBody() {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('posts')
-          .orderBy('date')
-          .snapshots(),
+      stream: FirebaseFirestore.instance.collection('posts').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final List<DocumentSnapshot> documents = snapshot.data!.docs;
@@ -67,12 +64,12 @@ class _HomePageState extends State<HomePage> {
         });
   }
 
-  _showAddCardTask(int index, String documentId) {
+  _showAddCardTask(int index, String documentId, String fishingPortDocsId) {
     showDialog(
         context: context,
         barrierDismissible: true,
         builder: (_) {
-          return DialogCatchForm(documentId);
+          return DialogCatchForm(documentId, fishingPortDocsId);
         });
   }
 
@@ -131,7 +128,6 @@ class _HomePageState extends State<HomePage> {
                             .collection('posts')
                             .doc(document.id)
                             .collection('catches')
-                            .orderBy('date')
                             .snapshots(),
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
@@ -143,7 +139,10 @@ class _HomePageState extends State<HomePage> {
                               itemBuilder: (context, index) {
                                 if (index == innerDocuments.length)
                                   return _buildAddCardTaskWidget(
-                                      context, index, document.id);
+                                      context,
+                                      index,
+                                      document.id,
+                                      document['fishingPortDocsId']);
                                 else
                                   return _buildCardTask(index, document.id,
                                       innerDocuments[index]);
@@ -233,13 +232,13 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildAddCardTaskWidget(
-      BuildContext context, int index, String documentId) {
+  Widget _buildAddCardTaskWidget(BuildContext context, int index,
+      String documentId, String fishingPortDocsId) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: InkWell(
         onTap: () {
-          _showAddCardTask(index, documentId);
+          _showAddCardTask(index, documentId, fishingPortDocsId);
         },
         child: Row(
           children: <Widget>[
