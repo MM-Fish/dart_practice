@@ -11,8 +11,29 @@ class _DialogFishingPortMethodFormState
     extends State<DialogFishingPortMethodForm> {
   String _fishingPort = '';
   String _fishingMethod = '底曳';
-  final List<String> fishingPortTargets = ['鳥取港', '網代港', '浜坂・諸寄港'];
-  List<String> _fishingMethods = ["底曳", "沿岸", "定置"];
+  final fishingPortTargets = Map<String, String>();
+  final List<String> _fishingMethods = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchFishingMethod();
+    fetchFishingPort();
+  }
+
+  void fetchFishingMethod() async {
+    QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection('fishing_methods').get();
+    snapshot.docs
+        .forEach((doc) => {_fishingMethods.add(doc['fishing_method'])});
+  }
+
+  void fetchFishingPort() async {
+    QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection('fishing_regions').get();
+    snapshot.docs
+        .forEach((doc) => {_fishingMethods[doc['prefecture']] = doc.id});
+  }
 
   Widget _fishingPortTextField() {
     return Autocomplete<String>(
@@ -20,7 +41,7 @@ class _DialogFishingPortMethodFormState
         if (textEditingValue.text == '') {
           return const Iterable<String>.empty();
         }
-        return fishingPortTargets.where((String option) {
+        return fishingPortTargets.keys.where((String option) {
           return option.contains(textEditingValue.text.toLowerCase());
         });
       },

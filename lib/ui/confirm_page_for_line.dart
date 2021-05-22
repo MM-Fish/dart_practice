@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:practice/ui/confirm_page_for_sashimori.dart';
 
-class ConfirmPage extends StatelessWidget {
+class ConfirmPageForLine extends StatelessWidget {
   final String date;
-  ConfirmPage(this.date);
+  ConfirmPageForLine(this.date);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('登録内容確認'),
+        title: Text('LINE用登録内容確認'),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -42,14 +43,22 @@ class ConfirmPage extends StatelessWidget {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pop(context);
+        },
+        child: Icon(Icons.compare_arrows_rounded),
+      ),
     );
   }
 
   Widget _catchData(BuildContext context, DocumentSnapshot document) {
-    String fishingPort = document['text'];
+    String fishingPort = document['fishingPort'];
+    String fishingMethod = document['fishingMethod'];
     return Column(
       children: [
         Text(fishingPort),
+        Text('【' + fishingMethod + '】'),
         FutureBuilder<QuerySnapshot>(
           future: FirebaseFirestore.instance
               .collection('posts')
@@ -67,18 +76,14 @@ class ConfirmPage extends StatelessWidget {
                 children: documents.map((document) {
                   if (document['condition'] == '鮮魚')
                     return Text(document['species'] +
-                        ' ' +
                         document['num'].toString() +
-                        ' ' +
                         document['unit']);
                   else {
                     return Text(document['species'] +
                         '(' +
                         document['condition'][0] +
                         ')' +
-                        ' ' +
                         document['num'].toString() +
-                        ' ' +
                         document['unit']);
                   }
                 }).toList(),

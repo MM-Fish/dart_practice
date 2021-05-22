@@ -16,25 +16,21 @@ class _DialogCatchFormState extends State<DialogCatchForm> {
   String _catchUnit = 'case';
   List<String> _fishConditionItems = ["鮮魚", "活魚", "冷凍", "A", "B"];
   String _fishCondition = "鮮魚";
-
-  // final List<String> searchTargets = ['赤ガレイ', 'エテガレイ', 'ハタハタ'];
-
+  List<String> searchResults = [];
   final _searchTargets = Map<String, String>();
 
   @override
   void initState() {
     super.initState();
-    fetchUserData();
+    fetchSearchTarget();
   }
 
-  void fetchUserData() async {
+  void fetchSearchTarget() async {
     QuerySnapshot snapshot =
         await FirebaseFirestore.instance.collection('validations').get();
     snapshot.docs.forEach(
         (doc) => {_searchTargets[doc['santiName']] = doc['haishinName']});
   }
-
-  List<String> searchResults = [];
 
   Widget _conditionButton() {
     return DropdownButton(

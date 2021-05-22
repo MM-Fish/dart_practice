@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
-import 'package:practice/ui/confirm_page.dart';
+import 'package:practice/ui/confirm_page_for_sashimori.dart';
 
 class SelectDatePage extends StatefulWidget {
   @override
@@ -9,7 +9,7 @@ class SelectDatePage extends StatefulWidget {
 }
 
 class _SelectDatePageState extends State<SelectDatePage> {
-  var _labelText = (DateFormat.MMMMEEEEd('ja')).format(DateTime.now());
+  var selectedDate = (DateFormat.MMMMEEEEd('ja')).format(DateTime.now());
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? selected = await showDatePicker(
@@ -21,7 +21,7 @@ class _SelectDatePageState extends State<SelectDatePage> {
     );
     if (selected != null) {
       setState(() {
-        _labelText = (DateFormat.MMMMEEEEd('JA')).format(selected);
+        selectedDate = (DateFormat.MMMMEEEEd('JA')).format(selected);
       });
     }
   }
@@ -38,7 +38,7 @@ class _SelectDatePageState extends State<SelectDatePage> {
           child: Column(
             children: <Widget>[
               Text(
-                _labelText,
+                selectedDate,
                 style: TextStyle(fontSize: 18),
               ),
               IconButton(
@@ -54,7 +54,7 @@ class _SelectDatePageState extends State<SelectDatePage> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) {
-              return ConfirmPage(_labelText);
+              return ConfirmPageForSashimori(selectedDate);
             }),
           );
         },
