@@ -54,7 +54,7 @@ class _SelectDatePageState extends State<SelectDatePage> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) {
-              return ConfirmPageForSashimori(selectedDate);
+              return ConfirmPage(selectedDate);
             }),
           );
         },

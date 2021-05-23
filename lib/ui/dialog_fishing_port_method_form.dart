@@ -33,7 +33,7 @@ class _DialogFishingPortMethodFormState
     QuerySnapshot prefectureSnapshot =
         await FirebaseFirestore.instance.collection('prefectures').get();
     prefectureSnapshot.docs.forEach((doc) => {
-          _prefectureTargets[doc['id']] = [doc['prefecture'], doc['charactor']]
+          _prefectureTargets[doc['id']] = [doc['prefecture'], doc['character']]
         });
     QuerySnapshot fishingPortSnapshot =
         await FirebaseFirestore.instance.collection('fishing_ports').get();
@@ -97,7 +97,7 @@ class _DialogFishingPortMethodFormState
             'fishingPort': _fishingPort,
             'fishingMethod': _fishingMethod,
             'prefecture': _fishingPortTargets[_fishingPort]![3],
-            'charactor': _fishingPortTargets[_fishingPort]![4],
+            'character': _fishingPortTargets[_fishingPort]![4],
           });
           Navigator.of(context).pop();
         },
