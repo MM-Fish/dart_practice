@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
-import 'package:practice/ui/confirm_page_for_sashimori.dart';
+import 'package:practice/ui/confirm_page.dart';
 
 class SelectDatePage extends StatefulWidget {
   @override
