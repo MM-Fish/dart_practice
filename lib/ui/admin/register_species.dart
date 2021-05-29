@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:practice/ui/menu_bar.dart';
 import 'package:practice/ui/admin/dialog_species_form.dart';
 import 'package:practice/ui/admin/dialog_fishing_port_form.dart';
 
@@ -16,6 +17,7 @@ class _RegisterSpeciesState extends State<RegisterSpeciesPage> {
         title: Text("着信名朝と配信名称の登録"),
       ),
       body: _buildBody(),
+      endDrawer: menuBar(context),
     );
   }
 
