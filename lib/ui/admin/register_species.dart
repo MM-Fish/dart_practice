@@ -1,41 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:practice/ui/select_date_page.dart';
-import 'package:practice/ui/dialog_catch_form.dart';
-import 'package:practice/ui/dialog_fishing_port_method_form.dart';
-import 'package:practice/ui/menu_bar.dart';
+import 'package:practice/ui/admin/dialog_species_form.dart';
+import 'package:practice/ui/admin/dialog_fishing_port_form.dart';
 
-class HomePage extends StatefulWidget {
+class RegisterSpeciesPage extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  _RegisterSpeciesState createState() => _RegisterSpeciesState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _RegisterSpeciesState extends State<RegisterSpeciesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("漁獲データ登録"),
+        title: Text("着信名朝と配信名称の登録"),
       ),
       body: _buildBody(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) {
-              return SelectDatePage();
-            }),
-          );
-        },
-        child: Icon(Icons.check),
-      ),
-      endDrawer: menuBar(context),
     );
   }
 
   _buildBody() {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('posts').snapshots(),
+      stream:
+          FirebaseFirestore.instance.collection('fishing_ports').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final List<DocumentSnapshot> documents = snapshot.data!.docs;
@@ -62,23 +49,22 @@ class _HomePageState extends State<HomePage> {
         context: context,
         barrierDismissible: true,
         builder: (_) {
-          return DialogFishingPortMethodForm();
+          return DialogRegisterFishingPort();
         });
   }
 
-  _showAddCardTask(int index, String documentId, String fishingPortDocsId) {
+  _showAddCardTask(int index, String documentId) {
     showDialog(
         context: context,
         barrierDismissible: true,
         builder: (_) {
-          return DialogCatchForm(documentId, fishingPortDocsId);
+          return DialogCatchForm(documentId);
         });
   }
 
   Widget _buildCard(
       BuildContext context, int index, DocumentSnapshot document) {
-    String cardTitle =
-        document['fishingPort'] + ' 【' + document['fishingMethod'] + '】';
+    String cardTitle = document['fishing_port'];
     return Container(
       child: Stack(
         children: <Widget>[
@@ -115,7 +101,7 @@ class _HomePageState extends State<HomePage> {
                         icon: Icon(Icons.delete),
                         onPressed: () async {
                           await FirebaseFirestore.instance
-                              .collection('posts')
+                              .collection('fishing_ports')
                               .doc(document.id)
                               .delete();
                         },
@@ -127,9 +113,9 @@ class _HomePageState extends State<HomePage> {
                       height: MediaQuery.of(context).size.height * 0.7,
                       child: StreamBuilder<QuerySnapshot>(
                         stream: FirebaseFirestore.instance
-                            .collection('posts')
+                            .collection('fishing_ports')
                             .doc(document.id)
-                            .collection('catches')
+                            .collection('validations')
                             .snapshots(),
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
@@ -141,10 +127,7 @@ class _HomePageState extends State<HomePage> {
                               itemBuilder: (context, index) {
                                 if (index == innerDocuments.length)
                                   return _buildAddCardTaskWidget(
-                                      context,
-                                      index,
-                                      document.id,
-                                      document['fishingPortDocsId']);
+                                      context, index, document.id);
                                 else
                                   return _buildCardTask(index, document.id,
                                       innerDocuments[index]);
@@ -213,18 +196,16 @@ class _HomePageState extends State<HomePage> {
       child: Container(
         color: Colors.blue[200],
         child: ListTile(
-          title: Text(innerDocument['species'] +
-              ' ' +
-              innerDocument['num'].toString() +
-              ' ' +
-              innerDocument['unit']),
+          title: Text(innerDocument['santi_name'] +
+              '→' +
+              innerDocument['haishin_name']),
           trailing: IconButton(
             icon: Icon(Icons.delete),
             onPressed: () async {
               await FirebaseFirestore.instance
-                  .collection('posts')
+                  .collection('fishing_ports')
                   .doc(documentId)
-                  .collection('catches')
+                  .collection('validations')
                   .doc(innerDocument.id)
                   .delete();
             },
@@ -234,13 +215,13 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildAddCardTaskWidget(BuildContext context, int index,
-      String documentId, String fishingPortDocsId) {
+  Widget _buildAddCardTaskWidget(
+      BuildContext context, int index, String documentId) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: InkWell(
         onTap: () {
-          _showAddCardTask(index, documentId, fishingPortDocsId);
+          _showAddCardTask(index, documentId);
         },
         child: Row(
           children: <Widget>[
