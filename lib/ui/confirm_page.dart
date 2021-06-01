@@ -13,22 +13,22 @@ class ConfirmPage extends StatefulWidget {
 
 class _ConfirmPageState extends State<ConfirmPage>
     with SingleTickerProviderStateMixin {
-  final _tab = <Tab>[
-    Tab(text: 'Line', icon: Icon(Icons.message)),
-    Tab(text: 'Sashimori', icon: Icon(Icons.apartment)),
-  ];
-  late TabController _tabController;
+  // final _tab = <Tab>[
+  //   Tab(text: 'Line', icon: Icon(Icons.message)),
+  //   Tab(text: 'Sashimori', icon: Icon(Icons.apartment)),
+  // ];
+  // late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     fetchPostData();
-    _tabController = TabController(vsync: this, length: _tab.length);
+    // _tabController = TabController(vsync: this, length: _tab.length);
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    // _tabController.dispose();
     super.dispose();
   }
 
@@ -90,11 +90,20 @@ class _ConfirmPageState extends State<ConfirmPage>
               .get()
               .then((QuerySnapshot innerSnapshot) {
             innerSnapshot.docs.forEach((innerDoc) {
-              _copiedTextData += innerDoc['condition'] +
-                  innerDoc['species'] +
-                  innerDoc['num'] +
-                  innerDoc['unit'] +
-                  '\n';
+              if (innerDoc['condition'] == '鮮魚') {
+                _copiedTextData += innerDoc['species'] +
+                    innerDoc['num'] +
+                    innerDoc['unit'] +
+                    '\n';
+              } else {
+                _copiedTextData += innerDoc['species'] +
+                    '(' +
+                    innerDoc['condition'] +
+                    ')' +
+                    innerDoc['num'] +
+                    innerDoc['unit'] +
+                    '\n';
+              }
             });
           });
         } else {
@@ -110,11 +119,20 @@ class _ConfirmPageState extends State<ConfirmPage>
               .get()
               .then((QuerySnapshot innerSnapshot) {
             innerSnapshot.docs.forEach((innerDoc) {
-              _copiedTextData += innerDoc['condition'] +
-                  innerDoc['species'] +
-                  innerDoc['num'] +
-                  innerDoc['unit'] +
-                  '\n';
+              if (innerDoc['condition'] == '鮮魚') {
+                _copiedTextData += innerDoc['species'] +
+                    innerDoc['num'] +
+                    innerDoc['unit'] +
+                    '\n';
+              } else {
+                _copiedTextData += innerDoc['species'] +
+                    '(' +
+                    innerDoc['condition'] +
+                    ')' +
+                    innerDoc['num'] +
+                    innerDoc['unit'] +
+                    '\n';
+              }
             });
           });
         }
@@ -133,11 +151,20 @@ class _ConfirmPageState extends State<ConfirmPage>
               .get()
               .then((QuerySnapshot innerSnapshot) {
             innerSnapshot.docs.forEach((innerDoc) {
-              _copiedTextData += innerDoc['condition'] +
-                  innerDoc['species'] +
-                  innerDoc['num'] +
-                  innerDoc['unit'] +
-                  '\n';
+              if (innerDoc['condition'] == '鮮魚') {
+                _copiedTextData += innerDoc['species'] +
+                    innerDoc['num'] +
+                    innerDoc['unit'] +
+                    '\n';
+              } else {
+                _copiedTextData += innerDoc['species'] +
+                    '(' +
+                    innerDoc['condition'] +
+                    ')' +
+                    innerDoc['num'] +
+                    innerDoc['unit'] +
+                    '\n';
+              }
             });
           });
         } else {
@@ -153,11 +180,20 @@ class _ConfirmPageState extends State<ConfirmPage>
               .get()
               .then((QuerySnapshot innerSnapshot) {
             innerSnapshot.docs.forEach((innerDoc) {
-              _copiedTextData += innerDoc['condition'] +
-                  innerDoc['species'] +
-                  innerDoc['num'] +
-                  innerDoc['unit'] +
-                  '\n';
+              if (innerDoc['condition'] == '鮮魚') {
+                _copiedTextData += innerDoc['species'] +
+                    innerDoc['num'] +
+                    innerDoc['unit'] +
+                    '\n';
+              } else {
+                _copiedTextData += innerDoc['species'] +
+                    '(' +
+                    innerDoc['condition'] +
+                    ')' +
+                    innerDoc['num'] +
+                    innerDoc['unit'] +
+                    '\n';
+              }
             });
           });
         }
@@ -177,20 +213,15 @@ class _ConfirmPageState extends State<ConfirmPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('登録内容確認'),
-          bottom: TabBar(
-            controller: _tabController,
-            tabs: _tab,
-          ),
-        ),
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            _linePage(),
-            _sashimoriPage(),
-          ],
-        ));
+      appBar: AppBar(
+        title: Text('LINE送信メッセージ'),
+        // bottom: TabBar(
+        //   controller: _tabController,
+        //   tabs: _tab,
+        // ),
+      ),
+      body: _linePage(),
+    );
   }
 
   Widget _linePage() {
@@ -198,16 +229,18 @@ class _ConfirmPageState extends State<ConfirmPage>
       stream: _copiedTextDataController.stream,
       builder: (context, snapshot) {
         if (snapshot.data != null) {
-          return Column(
-            children: [
-              IconButton(
-                icon: Icon(Icons.content_copy),
-                onPressed: () {
-                  _copyToClipboard(snapshot.data!.toString());
-                },
-              ),
-              Text(snapshot.data!.toString()),
-            ],
+          return Center(
+            child: Column(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.content_copy),
+                  onPressed: () {
+                    _copyToClipboard(snapshot.data!.toString());
+                  },
+                ),
+                Text(snapshot.data!.toString()),
+              ],
+            ),
           );
         } else {
           return Text('漁獲なし');
@@ -216,7 +249,7 @@ class _ConfirmPageState extends State<ConfirmPage>
     );
   }
 
-  Widget _sashimoriPage() {
-    return Text('linePage');
-  }
+  // Widget _sashimoriPage() {
+  //   return Text('linePage');
+  // }
 }

@@ -1,0 +1,33 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "catches",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "category1",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "category2",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "catches",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "category2",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "category1",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
